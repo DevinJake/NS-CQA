@@ -1,0 +1,16 @@
+The dataset is using the evenly-distributed annotation dataset for both seq2seq training and REINFORCE training.
+The vocabulary is the same vocab as used in unevenly distributed mask dataset.
+The PT_train dataset is used for supervised learning, the RL_train dataset is utilized for REINFOERCE by using BLEU as reward and the RL_train_TR (True Reward) is used for training REINFORCE by using F1 as reward. 
+
+RL_train_TR_old.question is the dataset used to train RL with 0-1 reward.
+When training MAML-RL, the model is still optimized based on the question used in RL.
+Thus the dataset is called 'old'..
+
+RL_train_TR_new.question is the dataset used to train MAML-RL.
+The dataset is another dataset that randomly extracted from the full dataset and is not the same as 'old' dataset.
+The MAML-RL model will be trained with the questions different from the quesitons used for RL training.
+
+ RL_train_TR_new/old_2k.question is the dataset used to train MAML-RL.
+ In these datasets, the number of the questions for meta-test is 2k.
+ Thus totally 2k*6 questions would be trained in MAML learning.
+ The datasets are used to train MAML with less dataset but to increase epoches of training in same time, and are subset of RL_train_TR_new/old.question.
