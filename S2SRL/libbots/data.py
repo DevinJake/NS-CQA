@@ -7,8 +7,6 @@ import pickle
 import json
 import torch
 
-from . import cornell
-
 UNKNOWN_TOKEN = '#UNK'
 BEGIN_TOKEN = "#BEG"
 END_TOKEN = "#END"
@@ -252,30 +250,6 @@ def get_vocab(path):
                 count = count + 1
                 # print(count)
     return token_list
-
-
-# Suppose the genre_filter is comedy and other parameters are as default.
-def load_data(genre_filter, max_tokens=MAX_TOKENS, min_token_freq=MIN_TOKEN_FEQ):
-    dialogues = cornell.load_dialogues(genre_filter=genre_filter)
-    if not dialogues:
-        log.error("No dialogues found, exit!")
-        sys.exit()
-    log.info("Loaded %d dialogues with %d phrases, generating training pairs",
-             len(dialogues), sum(map(len, dialogues)))
-    # 将dataset中的对话前一句和后一句组合成一个training pair，作为输入和输出;
-    phrase_pairs = dialogues_to_pairs(dialogues, max_tokens=max_tokens)
-    log.info("Counting freq of words...")
-    # get all words;
-    word_counts = collections.Counter()
-    for dial in dialogues:
-        for p in dial:
-            word_counts.update(p)
-    freq_set = set(map(lambda p: p[0], filter(lambda p: p[1] >= min_token_freq, word_counts.items())))
-    log.info("Data has %d uniq words, %d of them occur more than %d",
-             len(word_counts), len(freq_set), min_token_freq)
-    phrase_dict = phrase_pairs_dict(phrase_pairs, freq_set)
-    return phrase_pairs, phrase_dict
-
 
 def load_data_from_existing_data(QUESTION_PATH, ACTION_PATH, DIC_PATH, max_tokens=None):
     """
