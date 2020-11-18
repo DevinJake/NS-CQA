@@ -37,13 +37,7 @@ DIC_PATH = '../data/auto_QA_data/share.question'
 DIC_PATH_INT = '../data/auto_QA_data/share_INT.question'
 # DIC_PATH_INT = '../data/auto_QA_data/share_944K_INT.question'
 TRAIN_QUESTION_ANSWER_PATH = '../data/auto_QA_data/mask_even_1.0%/RL_train_TR_new.question'
-TRAIN_QUESTION_ANSWER_PATH_INT = '../data/auto_QA_data/mask_even_1.0%/RL_train_TR_new_INT.question'
-
-DIC_PATH_WEBQSP = '../data/webqsp_data/share.webqsp.question'
-DIC_PATH_INT_WEBQSP = '../data/webqsp_data/share.webqsp.question'
-TRAIN_QUESTION_ANSWER_PATH_WEBQSP = '../data/webqsp_data/final_webqsp_train_RLold.json'
-TRAIN_QUESTION_ANSWER_PATH_INT_WEBQSP = '../data/webqsp_data/final_webqsp_train_RLold.json'
-
+TRAIN_QUESTION_ANSWER_PATH_INT = '../data/auto_QA_data/mask_even_0.1%/RL_train_TR_new_INT.question'
 log = logging.getLogger("train")
 
 
@@ -60,59 +54,41 @@ def run_test(test_data, net, rev_emb_dict, end_token, device="cuda"):
         context, enc = net.encode_context(input_seq)
         # Decode sequence by feeding predicted token to the net again. Act greedily.
         # Return N*outputvocab, N output token indices.
-        _, tokens = net.decode_chain_argmax(enc, net.emb(beg_token), seq_len=data.MAX_TOKENS, context=context[0],
-                                            stop_at_token=end_token)
+        _, tokens = net.decode_chain_argmax(enc, net.emb(beg_token), seq_len=data.MAX_TOKENS, context = context[0], stop_at_token=end_token)
         # Show what the output action sequence is.
         action_tokens = []
         for temp_idx in tokens:
             if temp_idx in rev_emb_dict and rev_emb_dict.get(temp_idx) != '#END':
                 action_tokens.append(str(rev_emb_dict.get(temp_idx)).upper())
         # Using 0-1 reward to compute accuracy.
-        if args.dataset == "csqa":
-            reward = utils.calc_True_Reward(action_tokens, p2, False)
-        else:
-            reward = utils.calc_True_Reward_webqsp_novar(action_tokens, p2, False)
+        reward = utils.calc_True_Reward(action_tokens, p2, False)
         # reward = random.random()
         argmax_reward_sum += float(reward)
         argmax_reward_count += 1
-
-    if argmax_reward_count == 0:
-        return 0.0
-    else:
-        return float(argmax_reward_sum) / float(argmax_reward_count)
-
+    return float(argmax_reward_sum) / float(argmax_reward_count)
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)-15s %(levelname)s %(message)s", level=logging.INFO)
     # # command line parameters
     # # -a=True means using adaptive reward to train the model. -a=False is using 0-1 reward.
-    sys.argv = ['train_scst_cher.py', '--cuda',
-                '-l=../data/saves/crossent_1%_att=0_withINT_w2v=300/pre_bleu_0.956_43.dat',
-                '-d=csqa',
-                '-n=rl_TR_1%_batch8_att=0_withINT_CHER', '-s=5', '-a=0', '--att=0', '--lstm=1', '--int', '-w2v=300', '--beam_width=10', '--CHER', '--MonteCarlo', '--BeamSearch']
+    sys.argv = ['train_scst_true_reward.py', '--cuda', '-l=../data/saves/crossent_1%_att=0_withINT_w2v=300/pre_bleu_0.956_43.dat', '-n=rl_TR_1%_batch8_att=0_withINT_beam=10_montecarlo', '-s=5', '-a=0', '--att=0', '--lstm=1', '--int', '-w2v=300', '-beam_width=10', '--MonteCarlo']
     # sys.argv = ['train_scst_true_reward.py', '--cuda', '-l=../data/saves/crossent_even_1%/pre_bleu_0.946_55.dat', '-n=rl_even_true_1%', '-s=5']
     parser = argparse.ArgumentParser()
     # parser.add_argument("--data", required=True, help="Category to use for training. Empty string to train on full processDataset")
     parser.add_argument("--cuda", action='store_true', default=False, help="Enable cuda")
-    parser.add_argument("-d", "--dataset", default="csqa", help="Name of the dataset")
     parser.add_argument("-n", "--name", required=True, help="Name of the run")
-    parser.add_argument("-l", "--load", required=True,
-                        help="Load the pre-trained model whereby continue training the RL mode")
+    parser.add_argument("-l", "--load", required=True, help="Load the pre-trained model whereby continue training the RL mode")
     parser.add_argument("--memory_buffer_json", default=None, help="Load the recorded action memory for CHER training")
     # Number of decoding samples.
     parser.add_argument("-s", "--samples", type=int, default=4, help="Count of samples in prob mode")
     # The size of the beam search.
-    parser.add_argument("--beam_width", type=int, default=10, help="Size of beam search")
+    parser.add_argument("-beam_width", type=int, default=10, help="Size of beam search")
     # The dimension of the word embeddings.
     parser.add_argument("-w2v", "--word_dimension", type=int, default=50, help="The dimension of the word embeddings")
     # Choose the function to compute reward (0-1 or adaptive reward).
     # If a = true, 1 or yes, the adaptive reward is used. Otherwise 0-1 reward is used.
-    parser.add_argument("-a", "--adaptive", type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
-                        help="0-1 or adaptive reward")
-    parser.add_argument("--disable-skip", default=False, action='store_true',
-                        help="Disable skipping of samples with high argmax BLEU")
-    parser.add_argument("--BeamSearch", default=False, action='store_true',
-                        help="Using beam search for decoding")
+    parser.add_argument("-a", "--adaptive", type=lambda x: (str(x).lower() in ['true', '1', 'yes']), help="0-1 or adaptive reward")
+    parser.add_argument("--disable-skip", default=False, action='store_true', help="Disable skipping of samples with high argmax BLEU")
     parser.add_argument("--CHER", default=False, action='store_true',
                         help="Curriculum-guided Hindsight Experience Replay")
     # Choose the function to compute reward (0-1 or adaptive reward).
@@ -124,8 +100,7 @@ if __name__ == "__main__":
     # If false, the embedding tensors in the model do not need to be trained.
     parser.add_argument('--embed-grad', action='store_false', help='optimizing word embeddings when training')
     parser.add_argument('--int', action='store_true', help='training model with INT mask information')
-    parser.add_argument("--MonteCarlo", action='store_true', default=False,
-                        help="using Monte Carlo algorithm for REINFORCE")
+    parser.add_argument("--MonteCarlo", action='store_true', default=False, help="using Monte Carlo algorithm for REINFORCE")
     args = parser.parse_args()
     device = torch.device("cuda" if args.cuda else "cpu")
     log.info("Device info: %s", str(device))
@@ -135,22 +110,11 @@ if __name__ == "__main__":
 
     # # List of (question, {question information and answer}) pairs, the training pairs are in format of 1:1.
     if args.int:
-        if args.dataset == "csqa":
-            phrase_pairs, emb_dict = data.load_RL_data_TR_INT(TRAIN_QUESTION_ANSWER_PATH_INT, DIC_PATH_INT,
-                                                              MAX_TOKENS_INT)
-        else:
-            phrase_pairs, emb_dict = data.load_RL_data_TR_INT(TRAIN_QUESTION_ANSWER_PATH_INT_WEBQSP,
-                                                              DIC_PATH_INT_WEBQSP, MAX_TOKENS_INT)
-        log.info("Obtained %d phrase pairs with %d uniq words from %s with INT mask information.", len(phrase_pairs),
-                 len(emb_dict), TRAIN_QUESTION_ANSWER_PATH_INT)
+        phrase_pairs, emb_dict = data.load_RL_data_TR_INT(TRAIN_QUESTION_ANSWER_PATH_INT, DIC_PATH_INT, MAX_TOKENS_INT)
+        log.info("Obtained %d phrase pairs with %d uniq words from %s with INT mask information.", len(phrase_pairs), len(emb_dict), TRAIN_QUESTION_ANSWER_PATH_INT)
     else:
-        if args.dataset == "csqa":
-            phrase_pairs, emb_dict = data.load_RL_data_TR(TRAIN_QUESTION_ANSWER_PATH, DIC_PATH, MAX_TOKENS)
-        else:
-            phrase_pairs, emb_dict = data.load_RL_data_TR(TRAIN_QUESTION_ANSWER_PATH_WEBQSP, DIC_PATH_WEBQSP,
-                                                          MAX_TOKENS)
-        log.info("Obtained %d phrase pairs with %d uniq words from %s without INT mask information.", len(phrase_pairs),
-                 len(emb_dict), TRAIN_QUESTION_ANSWER_PATH)
+        phrase_pairs, emb_dict = data.load_RL_data_TR(TRAIN_QUESTION_ANSWER_PATH, DIC_PATH, MAX_TOKENS)
+        log.info("Obtained %d phrase pairs with %d uniq words from %s without INT mask information.", len(phrase_pairs), len(emb_dict), TRAIN_QUESTION_ANSWER_PATH)
 
     data.save_emb_dict(saves_path, emb_dict)
     end_token = emb_dict[data.END_TOKEN]
@@ -173,10 +137,6 @@ if __name__ == "__main__":
         log.info("Using LSTM mechanism to train the SEQ2SEQ model...")
     else:
         log.info("Using RNN mechanism to train the SEQ2SEQ model...")
-    if args.BeamSearch:
-        log.info("Using beam search for decoding...")
-    else:
-        log.info("Using chain sampling for decoding...")
     if args.CHER:
         log.info("Using CHER mechanism to train the SEQ2SEQ model...")
     if args.MonteCarlo:
@@ -191,8 +151,7 @@ if __name__ == "__main__":
     # Index -> word.
     rev_emb_dict = {idx: word for word, idx in emb_dict.items()}
     # PhraseModel.__init__() to establish a LSTM model.
-    net = model.PhraseModel(emb_size=args.word_dimension, dict_size=len(emb_dict), hid_size=model.HIDDEN_STATE_SIZE,
-                            LSTM_FLAG=args.lstm, ATT_FLAG=args.att).to(device)
+    net = model.PhraseModel(emb_size=args.word_dimension, dict_size=len(emb_dict), hid_size=model.HIDDEN_STATE_SIZE, LSTM_FLAG=args.lstm, ATT_FLAG=args.att).to(device)
     # Using cuda.
     net.cuda()
     log.info("Model: %s", net)
@@ -201,7 +160,7 @@ if __name__ == "__main__":
     # Load the pre-trained seq2seq model.
     net.load_state_dict(torch.load(args.load))
     log.info("Model loaded from %s, continue training in RL mode...", args.load)
-    if args.adaptive:
+    if(args.adaptive):
         log.info("Using adaptive reward to train the REINFORCE model...")
     else:
         log.info("Using 0-1 sparse reward to train the REINFORCE model...")
@@ -276,8 +235,7 @@ if __name__ == "__main__":
                     item_enc = net.get_encoded_item(enc, idx)
                     # # 'r_argmax' is the list of out_logits list and 'actions' is the list of output tokens.
                     # # The output tokens are generated greedily by using chain_argmax (using last setp's output token as current input token).
-                    r_argmax, actions = net.decode_chain_argmax(item_enc, beg_embedding, data.MAX_TOKENS, context[idx],
-                                                                stop_at_token=end_token)
+                    r_argmax, actions = net.decode_chain_argmax(item_enc, beg_embedding, data.MAX_TOKENS, context[idx], stop_at_token=end_token)
                     # Show what the output action sequence is.
                     action_tokens = []
                     for temp_idx in actions:
@@ -286,10 +244,7 @@ if __name__ == "__main__":
                     # Get the highest BLEU score as baseline used in self-critic.
                     # If the last parameter is false, it means that the 0-1 reward is used to calculate the accuracy.
                     # Otherwise the adaptive reward is used.
-                    if args.dataset == "csqa":
-                        argmax_reward = utils.calc_True_Reward(action_tokens, qa_info, args.adaptive)
-                    else:
-                        argmax_reward = utils.calc_True_Reward_webqsp_novar(action_tokens, qa_info, args.adaptive)
+                    argmax_reward = utils.calc_True_Reward(action_tokens, qa_info, args.adaptive)
                     # argmax_reward = random.random()
                     true_reward_argmax.append(argmax_reward)
 
@@ -307,41 +262,21 @@ if __name__ == "__main__":
                         log.info("orig_response: %s", orig_response)
                         log.info("Argmax: %s, reward=%.4f", utils.untokenize(data.decode_words(actions, rev_emb_dict)), argmax_reward)
 
-                    if args.BeamSearch:
-                        sample_logits_list, action_sequence_list = net.beam_decode(hid=item_enc, seq_len=data.MAX_TOKENS, context=context[idx], start_token=beg_token, stop_at_token=end_token, beam_width=args.beam_width, topk=args.samples)
-                    else:
-                        chain_sampling_action_memory = []
+                    sample_logits_list, action_sequence_list = net.beam_decode(hid=item_enc, seq_len=data.MAX_TOKENS, context=context[idx], start_token=beg_token, stop_at_token=end_token, beam_width=args.beam_width, topk=args.samples)
 
                     qid = qa_info['qid']
                     action_memory = list()
 
-                    sample_losses = []
-                    for sample_index in range(args.samples):
-                        # The data for each task in a batch of tasks.
-                        inner_net_policies = []
-                        inner_net_actions = []
-                        inner_net_advantages = []
+                    # The data for each task in a batch of tasks.
+                    inner_net_policies = []
+                    inner_net_actions = []
+                    inner_net_advantages = []
 
-                        if args.BeamSearch:
-                            # 'r_sample' is the list of out_logits list and 'actions' is the list of output tokens.
-                            # The output tokens are sampled following probability by using chain_sampling.
-                            actions = action_sequence_list[sample_index]
-                            r_sample = sample_logits_list[sample_index]
-                        else:
-                            r_sample, actions = net.decode_chain_sampling(item_enc, beg_embedding, data.MAX_TOKENS,
-                                                                          context[idx], stop_at_token=end_token)
-                            # Omit duplicate action sequence to decrease the computing time and to avoid the case that
-                            # the probability of such kind of duplicate action sequences would be increased redundantly and abnormally.
-                            duplicate_flag = False
-                            if len(chain_sampling_action_memory) > 0:
-                                for temp_list in chain_sampling_action_memory:
-                                    if utils.duplicate(temp_list, actions):
-                                        duplicate_flag = True
-                                        break
-                            if not duplicate_flag:
-                                chain_sampling_action_memory.append(actions)
-                            else:
-                                continue
+                    for sample_index in range(args.samples):
+                        # 'r_sample' is the list of out_logits list and 'actions' is the list of output tokens.
+                        # The output tokens are sampled following probability by using chain_sampling.
+                        actions = action_sequence_list[sample_index]
+                        r_sample = sample_logits_list[sample_index]
 
                         # Show what the output action sequence is.
                         action_tokens = []
@@ -350,15 +285,11 @@ if __name__ == "__main__":
                                 action_tokens.append(str(rev_emb_dict.get(temp_idx)).upper())
                         # If the last parameter is false, it means that the 0-1 reward is used to calculate the accuracy.
                         # Otherwise the adaptive reward is used.
-                        if args.dataset == "csqa":
-                            sample_reward = utils.calc_True_Reward(action_tokens, qa_info, args.adaptive)
-                        else:
-                            sample_reward = utils.calc_True_Reward_webqsp_novar(action_tokens, qa_info, args.adaptive)
+                        sample_reward = utils.calc_True_Reward(action_tokens, qa_info, args.adaptive)
                         # sample_reward = random.random()
 
                         if args.CHER:
-                            if sample_reward >= argmax_reward and sample_reward > 0.0:
-                            # if sample_reward > 0.0:
+                            if sample_reward > 0.0:
                                 action_memory.append(action_tokens)
                             # Compute reward bonus.
                             action_buffer = memory_buffer[qid] if qid in memory_buffer else None
@@ -408,28 +339,6 @@ if __name__ == "__main__":
                                 net_advantages.extend(advantages)
                         true_reward_sample.append(sample_reward)
 
-                        # Compute the loss for each task in a batch.
-                        if args.MonteCarlo:
-                            inner_policies_v = torch.cat(inner_net_policies).to(device)
-                            # Indices of all output tokens whose size is 1 * N;
-                            inner_actions_t = torch.LongTensor(inner_net_actions).to(device)
-                            # All output tokens reward whose size is 1 *pack_batch N;
-                            inner_adv_v = torch.FloatTensor(inner_net_advantages).to(device)
-                            # Compute log(softmax(logits)) of all output tokens in size of N * output vocab size;
-                            inner_log_prob_v = F.log_softmax(inner_policies_v, dim=1).to(device)
-                            # Q_1 = Q_2 =...= Q_n = BLEU(OUT,REF);
-                            # ▽J = Σ_n[Q▽logp(T)] = ▽Σ_n[Q*logp(T)] = ▽[Q_1*logp(T_1)+Q_2*logp(T_2)+...+Q_n*logp(T_n)];
-                            # log_prob_v[range(len(net_actions)), actions_t]: for each output, get the output token's log(softmax(logits)).
-                            # adv_v * log_prob_v[range(len(net_actions)), actions_t]:
-                            # get Q * logp(T) for all tokens of all decode_chain_sampling samples in size of 1 * N;
-                            inner_log_prob_actions_v = inner_adv_v * inner_log_prob_v[
-                                range(len(inner_net_actions)), inner_actions_t].to(device)
-                            # For the optimizer is Adam (Adaptive Moment Estimation) which is a optimizer used for gradient descent.
-                            # Therefore, to maximize ▽J (log_prob_actions_v) is to minimize -▽J.
-                            # .sum() is to calculate loss for a sample.
-                            inner_sample_loss_policy_v = -inner_log_prob_actions_v.sum().to(device)
-                            sample_losses.append(inner_sample_loss_policy_v)
-
                     # Update memory_buffer.
                     if args.CHER and len(action_memory) > 0:
                         if qid not in memory_buffer:
@@ -455,12 +364,27 @@ if __name__ == "__main__":
                                     memory_buffer[qid] = q_memory
                     dial_shown = True
                     # log.info("Epoch %d, Batch %d, Sample %d: %s is trained!", epoch, batch_count, idx, qa_info['qid'])
-
+                    # Compute the loss for each task in a batch.
                     if args.MonteCarlo:
-                        task_loss = torch.stack(sample_losses).to(device)
-                        inner_task_loss_policy_v = task_loss.mean().to(device)
+                        inner_policies_v = torch.cat(inner_net_policies).to(device)
+                        # Indices of all output tokens whose size is 1 * N;
+                        inner_actions_t = torch.LongTensor(inner_net_actions).to(device)
+                        # All output tokens reward whose size is 1 *pack_batch N;
+                        inner_adv_v = torch.FloatTensor(inner_net_advantages).to(device)
+                        # Compute log(softmax(logits)) of all output tokens in size of N * output vocab size;
+                        inner_log_prob_v = F.log_softmax(inner_policies_v, dim=1).to(device)
+                        # Q_1 = Q_2 =...= Q_n = BLEU(OUT,REF);
+                        # ▽J = Σ_n[Q▽logp(T)] = ▽Σ_n[Q*logp(T)] = ▽[Q_1*logp(T_1)+Q_2*logp(T_2)+...+Q_n*logp(T_n)];
+                        # log_prob_v[range(len(net_actions)), actions_t]: for each output, get the output token's log(softmax(logits)).
+                        # adv_v * log_prob_v[range(len(net_actions)), actions_t]:
+                        # get Q * logp(T) for all tokens of all decode_chain_sampling samples in size of 1 * N;
+                        inner_log_prob_actions_v = inner_adv_v * inner_log_prob_v[range(len(inner_net_actions)), inner_actions_t].to(device)
+                        # For the optimizer is Adam (Adaptive Moment Estimation) which is a optimizer used for gradient descent.
+                        # Therefore, to maximize ▽J (log_prob_actions_v) is to minimize -▽J.
+                        # .mean() is to calculate Monte Carlo sampling.
+                        inner_loss_policy_v = -inner_log_prob_actions_v.mean().to(device)
                         # Record the loss for each task in a batch.
-                        net_losses.append(inner_task_loss_policy_v)
+                        net_losses.append(inner_loss_policy_v)
 
                 if not net_policies and not net_losses:
                     continue
@@ -525,12 +449,10 @@ if __name__ == "__main__":
                 best_true_reward = true_reward_test
                 log.info("Best true reward updated: %.4f", true_reward_test)
                 # Save the updated seq2seq parameters trained by RL.
-                torch.save(net.state_dict(),
-                           os.path.join(saves_path, "truereward_%.3f_%02d.dat" % (true_reward_test, epoch)))
+                torch.save(net.state_dict(), os.path.join(saves_path, "truereward_%.3f_%02d.dat" % (true_reward_test, epoch)))
             # if epoch % 10 == 0:
             # # The parameters are stored after each epoch.
-            torch.save(net.state_dict(), os.path.join(saves_path, "epoch_%03d_%.3f_%.3f.dat" % (
-            epoch, float(true_reward_armax), true_reward_test)))
+            torch.save(net.state_dict(), os.path.join(saves_path, "epoch_%03d_%.3f_%.3f.dat" % (epoch, float(true_reward_armax), true_reward_test)))
 
             # Record the memory buffer for each epoch in case that the training is interrupted.
             if args.CHER:
