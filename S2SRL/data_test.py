@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # # command line parameters for final test
     # sys.argv = ['data_test.py', '-m=bleu_0.984_09.dat', '-p=final', '--n=rl_even']
     # command line parameters for final test (subset data)
-    sys.argv = ['data_test.py', '-m=pre_bleu_0.956_43.dat', '--cuda', '-p=sample_final_int', '--n=crossent_1%_att=0_withINT_w2v=300', '--att=0', '--lstm=1', '--int', '-w2v=300', '--beam_search']
+    sys.argv = ['data_test.py', '-m=truereward_0.786_20.dat', '--cuda', '-p=sample_final_int', '--n=rl_TR_1%_batch8_att=0_withINT_beam=10_CHER_Montecarlo_newserver', '--att=0', '--lstm=1', '--int', '-w2v=300', '--beam_search']
     parser = argparse.ArgumentParser()
     # parser.add_argument("--data", required=True,
     #                     help="Category to use for training. Empty string to train on full processDataset")
