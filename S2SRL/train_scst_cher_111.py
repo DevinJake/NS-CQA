@@ -37,7 +37,7 @@ DIC_PATH = '../data/auto_QA_data/share.question'
 DIC_PATH_INT = '../data/auto_QA_data/share_INT.question'
 # DIC_PATH_INT = '../data/auto_QA_data/share_944K_INT.question'
 TRAIN_QUESTION_ANSWER_PATH = '../data/auto_QA_data/mask_even_1.0%/RL_train_TR_new.question'
-TRAIN_QUESTION_ANSWER_PATH_INT = '../data/auto_QA_data/mask_even_0.1%/RL_train_TR_new_INT.question'
+TRAIN_QUESTION_ANSWER_PATH_INT = '../data/auto_QA_data/mask_even_1.0%/RL_train_TR_new_INT.question'
 log = logging.getLogger("train")
 
 
@@ -54,7 +54,7 @@ def run_test(test_data, net, rev_emb_dict, end_token, device="cuda"):
         context, enc = net.encode_context(input_seq)
         # Decode sequence by feeding predicted token to the net again. Act greedily.
         # Return N*outputvocab, N output token indices.
-        _, tokens = net.decode_chain_argmax(enc, net.emb(beg_token), seq_len=data.MAX_TOKENS, context = context[0], stop_at_token=end_token)
+        _, tokens = net.decode_chain_argmax(enc, net.emb(beg_token), seq_len=data.MAX_TOKENS, context=context[0], stop_at_token=end_token)
         # Show what the output action sequence is.
         action_tokens = []
         for temp_idx in tokens:
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)-15s %(levelname)s %(message)s", level=logging.INFO)
     # # command line parameters
     # # -a=True means using adaptive reward to train the model. -a=False is using 0-1 reward.
-    sys.argv = ['train_scst_true_reward.py', '--cuda', '-l=../data/saves/crossent_1%_att=0_withINT_w2v=300/pre_bleu_0.956_43.dat', '-n=rl_TR_1%_batch8_att=0_withINT_beam=10_montecarlo', '-s=5', '-a=0', '--att=0', '--lstm=1', '--int', '-w2v=300', '-beam_width=10', '--MonteCarlo']
+    sys.argv = ['train_scst_cher.py', '--cuda', '-l=../data/saves/crossent_1%_att=0_withINT_w2v=300/pre_bleu_0.956_43.dat', '-n=rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER', '-s=5', '-a=0', '--att=0', '--lstm=1', '--int', '-w2v=300', '-beam_width=10', '--CHER', '--MonteCarlo']
     # sys.argv = ['train_scst_true_reward.py', '--cuda', '-l=../data/saves/crossent_even_1%/pre_bleu_0.946_55.dat', '-n=rl_even_true_1%', '-s=5']
     parser = argparse.ArgumentParser()
     # parser.add_argument("--data", required=True, help="Category to use for training. Empty string to train on full processDataset")
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     # Number of decoding samples.
     parser.add_argument("-s", "--samples", type=int, default=4, help="Count of samples in prob mode")
     # The size of the beam search.
-    parser.add_argument("-beam_width", type=int, default=10, help="Size of beam search")
+    parser.add_argument("--beam_width", type=int, default=10, help="Size of beam search")
     # The dimension of the word embeddings.
     parser.add_argument("-w2v", "--word_dimension", type=int, default=50, help="The dimension of the word embeddings")
     # Choose the function to compute reward (0-1 or adaptive reward).
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     # Load the pre-trained seq2seq model.
     net.load_state_dict(torch.load(args.load))
     log.info("Model loaded from %s, continue training in RL mode...", args.load)
-    if(args.adaptive):
+    if args.adaptive:
         log.info("Using adaptive reward to train the REINFORCE model...")
     else:
         log.info("Using 0-1 sparse reward to train the REINFORCE model...")
@@ -289,7 +289,7 @@ if __name__ == "__main__":
                         # sample_reward = random.random()
 
                         if args.CHER:
-                            if sample_reward > 0.0:
+                            if sample_reward >= argmax_reward and sample_reward > 0.0:
                                 action_memory.append(action_tokens)
                             # Compute reward bonus.
                             action_buffer = memory_buffer[qid] if qid in memory_buffer else None
