@@ -89,7 +89,7 @@ if __name__ == "__main__":
     sys.argv = ['train_scst_cher.py', '--cuda',
                 '-l=../data/saves/crossent_1%_att=0_withINT_w2v=300/pre_bleu_0.956_43.dat',
                 '-d=csqa',
-                '-n=rl_TR_1%_batch8_att=0_withINT_CHER', '-s=5', '-a=0', '--att=0', '--lstm=1', '--int', '-w2v=300', '--beam_width=10', '--CHER', '--MonteCarlo', '--BeamSearch']
+                '-n=rl_TR_1%_batch8_att=0_withINT_beam=10_CHER_Montecarlo', '-s=5', '-a=0', '--att=0', '--lstm=1', '--int', '-w2v=300', '--beam_width=10', '--CHER', '--MonteCarlo', '--BeamSearch']
     # sys.argv = ['train_scst_true_reward.py', '--cuda', '-l=../data/saves/crossent_even_1%/pre_bleu_0.946_55.dat', '-n=rl_even_true_1%', '-s=5']
     parser = argparse.ArgumentParser()
     # parser.add_argument("--data", required=True, help="Category to use for training. Empty string to train on full processDataset")
