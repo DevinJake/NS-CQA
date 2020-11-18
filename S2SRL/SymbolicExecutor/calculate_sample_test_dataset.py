@@ -6,12 +6,14 @@
 # coding:utf-8
 '''Get all questions, annotated actions, entities, relations, types together in JSON format.
 '''
-
+import os
 import json
 from symbolics import Symbolics
 from transform_util import transformBooleanToString, list2dict
 import logging
 import sys
+dir = '../../data/auto_QA_data/test_result/'
+os.makedirs(dir, exist_ok=True)
 log = logging.basicConfig(level = logging.INFO,
                            filename ='../../data/auto_QA_data/test_result/rl_TR_1%_batch8_att=0_withINT_beam=10_CHER_Montecarlo.log',
                            filemode ='w', format = '%(message)s')
@@ -279,10 +281,11 @@ def transMask2Action(state, withint):
         return linelist
 
 def calculate_RL_or_DL_result(file_path, withint):
-    path = '../../data/auto_QA_data/test_result/'+file_path+'.txt'
+    dir = '../../data/auto_QA_data/test_result/'
+    path = dir+file_path+'.txt'
+    os.makedirs(dir, exist_ok=True)
     linelist = list()
     fw = open(path, 'w', encoding="UTF-8")
-    # fw = open('../../data/auto_QA_data/test_result/1%_full_test_result_TR_batch8.txt', 'w', encoding="UTF-8")
     state_list = ["SimpleQuestion(Direct)", "Verification(Boolean)(All)", "QuantitativeReasoning(Count)(All)",
                   "QuantitativeReasoning(All)", "ComparativeReasoning(Count)(All)", "ComparativeReasoning(All)",
                   "LogicalReasoning(All)"]
