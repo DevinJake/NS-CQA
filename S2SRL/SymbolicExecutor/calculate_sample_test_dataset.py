@@ -15,7 +15,7 @@ import sys
 dir = '../../data/auto_QA_data/test_result/'
 os.makedirs(dir, exist_ok=True)
 log = logging.basicConfig(level = logging.INFO,
-                           filename ='../../data/auto_QA_data/test_result/rl_TR_1%_batch8_att=0_withINT_beam=10_CHER_Montecarlo.log',
+                           filename ='../../data/auto_QA_data/test_result/rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER.log',
                            filemode ='w', format = '%(message)s')
 
 
