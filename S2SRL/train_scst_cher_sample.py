@@ -175,7 +175,7 @@ if __name__ == "__main__":
     # Load the pre-trained seq2seq model.
     net.load_state_dict(torch.load(args.load))
     log.info("Model loaded from %s, continue training in RL mode...", args.load)
-    if (args.adaptive):
+    if args.adaptive:
         log.info("Using adaptive reward to train the REINFORCE model...")
     else:
         log.info("Using 0-1 sparse reward to train the REINFORCE model...")
