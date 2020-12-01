@@ -76,7 +76,7 @@ if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)-15s %(levelname)s %(message)s", level=logging.INFO)
     # # command line parameters
     # # -a=True means using adaptive reward to train the model. -a=False is using 0-1 reward.
-    sys.argv = ['train_scst_cher.py', '--cuda',
+    sys.argv = ['train_scst_cher_webqsp.py', '--cuda',
                 '-l=../data/saves/webqsp/crossent_even_att=0_withINT/epoch_020_0.984_0.964.dat',
                 '-n=rl_TR_1%_batch8_att=0_withINT_CHER_test', '-s=5', '-a=0', '--att=0', '--lstm=1', '--int',
                 '-w2v=300', '--beam_width=10', '--CHER', '--MonteCarlo']
