@@ -15,7 +15,7 @@ import sys
 dir = '../../data/auto_QA_data/test_result/'
 os.makedirs(dir, exist_ok=True)
 log = logging.basicConfig(level = logging.INFO,
-                           filename ='../../data/auto_QA_data/test_result/rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER.log',
+                           filename ='../../data/auto_QA_data/test_result/rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER_all.log',
                            filemode ='w', format = '%(message)s')
 
 
@@ -103,11 +103,11 @@ def calc_single_sample(withint=False):
 def transMask2Action(state, withint):
     if withint:
         json_path = '../../data/auto_QA_data/CSQA_ANNOTATIONS_test_INT.json'
-        question_path = '../../data/auto_QA_data/mask_test/SAMPLE_FINAL_INT_test.question'
+        question_path = '../../data/auto_QA_data/mask_test/FINAL_INT_test.question'
     else:
         json_path = '../../data/auto_QA_data/CSQA_ANNOTATIONS_test.json'
-        question_path = '../../data/auto_QA_data/mask_test/SAMPLE_FINAL_test.question'
-    with open(json_path, 'r') as load_f, open("../../data/saves/rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER/sample_final_int_predict.actions", 'r') as predict_actions \
+        question_path = '../../data/auto_QA_data/mask_test/FINAL_test.question'
+    with open(json_path, 'r') as load_f, open("../../data/saves/rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER/final_int_predict.actions", 'r') as predict_actions \
             , open(question_path, 'r') as RL_test:
         # with open("../../data/auto_QA_data/CSQA_ANNOTATIONS_test.json", 'r') as load_f, open("../../data/saves/rl_even_TR_batch8_1%/final_predict.actions", 'r') as predict_actions \
         #         , open("../../data/auto_QA_data/mask_test/FINAL_test.question", 'r') as RL_test:
@@ -297,5 +297,5 @@ def calculate_RL_or_DL_result(file_path, withint):
 
 
 if __name__ == "__main__":
-    calculate_RL_or_DL_result('rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER', withint=True)
+    calculate_RL_or_DL_result('rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER_all', withint=True)
     # calc_single_sample()
