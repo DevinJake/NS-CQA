@@ -1,5 +1,5 @@
 # NS-CQA: for JWS 2020 submission.
-Our paper is published in JWS 2020 [1], which is 'Less is More: Data-Efficient Complex Question Answering over Knowledge Bases'.
+Our paper is published in JWS 2020 [1], which is 'Less is more: Data-efficient complex question answering over knowledge bases'.
 We aim to solve the CQA task [2], targeting at answering factual questions through complex inferring over a realistic-sized KG of millions of entities.  
 
 We could learn the details of the CQA dataset [here](https://amritasaha1812.github.io/CSQA/download_CQA/).  
@@ -116,7 +116,7 @@ git clone https://github.com/DevinJake/NS-CQA.git
   We could find the generated action sequences in the folder where the model is in (for instance `NS-CQA/data/saves/rl_cher`), which is stored in the file `final_int_predict.actions` or `sample_final_int_predict.actions`.   
   
   (4). Calculate the result.   
-  Firstly, we should download the files `CSQA_ANNOTATIONS_test.json` from the [data link](https://drive.google.com/drive/folders/11HM--PcWxGicHnwMRTmgZ3GWCdugxiNC?usp=sharing) and put it into the folder `NS-CQA/data/auto_QA_data/` of the project, which is used to record the ground-truth answers of each question.  
+  Firstly, we should download the files `CSQA_ANNOTATIONS_test_INT.json` from the [data link](https://drive.google.com/drive/folders/11HM--PcWxGicHnwMRTmgZ3GWCdugxiNC?usp=sharing) and put it into the folder `NS-CQA/data/auto_QA_data/` of the project, which is used to record the ground-truth answers of each question.  
    
   After generating the actions, we could use them to compute the QA result.  
   For example, we use the saved models to predict actions for the testing questions, and therefore generate a file `NS-CQA/data/saves/rl_cher/final_int_predict.actions` to record the generated actions for all the testing questions.  
