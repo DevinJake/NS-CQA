@@ -254,12 +254,8 @@ def calc_01_reward(answer, qa_info):
                             right_count += 1
                     return float(right_count)/float(len(response_entities))
 
-'''
-Adaptive reward 是一种partial reward。
-首先看问题类型是不是对的，若不对，则整个reward为0；
-若对，而答案一个都不对，那么就有W_1的reward；
-若type对，答案有一部分也对，再计算不同问题类型的答案正确率（答案是entities的就用F1，答案是boolean的就用准确率，答案是数字的就用s = 1-|T-P|/|T+P+ε|，为R_answer，再乘以权重W_2，这样来计算reward。
-即：reward = R_type * (W_1 + W_2 * R_answer), W_1 + W_2 = 1。'''
+
+# Adaptive reward: reward = R_type * (W_1 + W_2 * R_answer), W_1 + W_2 = 1;
 def calc_adaptative_reward(answer, qa_info):
     response_entities = qa_info['response_entities'] if 'response_entities' in qa_info.keys() else []
     orig_response = qa_info['orig_response'].strip() if 'orig_response' in qa_info.keys() else ""

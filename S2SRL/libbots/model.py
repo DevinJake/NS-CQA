@@ -4,8 +4,6 @@ import torch
 import torch.nn as nn
 import torch.nn.utils.rnn as rnn_utils
 import torch.nn.functional as F
-
-from collections import OrderedDict
 from . import utils
 from . import attention
 from . import beam_search_node
@@ -176,7 +174,7 @@ class PhraseModel(nn.Module):
         #                     [ 3],
         #                     [ 4]])
         out, new_hid = self.decoder(input_x.unsqueeze(0), hid)
-        if (self.attention_flag):
+        if self.attention_flag:
             out, attn = self.attention(out, context)
         # Self.output(out) using nn.Linear(hid_size, dict_size) to transform hidden states into logits over output vocab.
         out = self.output(out)
@@ -380,34 +378,40 @@ class PhraseModel(nn.Module):
         # A lambda function is a small anonymous function, the example is as following.
         # x = lambda a, b: a * b
         # print(x(5, 6))
-        # Sort descending (CuDNN requirements) batch中第一个元素为最长的句子；
+        # Sort descending (CuDNN requirements)
+        # The first sentence in a batch is the longest sentence in this batch.
         batch.sort(key=lambda s: len(s[0]), reverse=True)
-        # input_idx：一个batch的输入句子的tokens对应的ID矩阵；Each row is corresponding to one input sentence.
-        # output_idx：一个batch的输出句子的tokens对应的ID矩阵；Each row is corresponding to a list of several output sentences.
-        # zip wants a bunch of arguments to zip together, but what you have is a single argument (a list, whose elements are also lists).
-        # The * in a function call "unpacks" a list (or other iterable), making each of its elements a separate argument.
+        # input_idx: each token in a sentence has an unique ID,
+        # the IDs will represent the tokens in a sentences.
+        # Therefore the sentencs in a batch will form a ID matrix;
+        # Each row is corresponding to one input sentence.
+        # output_idx: the token IDs corresponding to the output sentences will form an output matrix;
+        # Each row is corresponding to a list of several output sentences.
+        # zip wants a bunch of arguments to zip together,
+        # but what you have is a single argument (a list, whose elements are also lists).
+        # The * in a function call "unpacks" a list (or other iterable),
+        # making each of its elements a separate argument.
         # For list p = [[1,2,3],[4,5,6]];
-        # So without the *, you're doing zip( [[1,2,3],[4,5,6]] ). With the *, you're doing zip([1,2,3], [4,5,6]) = [(1, 4), (2, 5), (3, 6)].
+        # So without the *, you're doing zip( [[1,2,3],[4,5,6]] ).
+        # With the *, you're doing zip([1,2,3], [4,5,6]) = [(1, 4), (2, 5), (3, 6)].
         input_idx, output_idx = zip(*batch)
         # create padded matrix of inputs
-        # map() function returns a list of the results after applying the given function to each item of a given iterable (list, tuple etc.)
+        # map() function returns a list of the results after applying the given function
+        # to each item of a given iterable (list, tuple etc.)
         # For example:
         # numbers = (1, 2, 3, 4)
         # result = map(lambda x: x + x, numbers)
         # print(list(result))
         # Output: {2, 4, 6, 8}
-        # 建立长度词典，为batch中每一个元素的长度；
         lens = list(map(len, input_idx))
-        # 以最长的句子来建立batch*最长句子长度的全0矩阵；
         input_mat = np.zeros((len(batch), lens[0]), dtype=np.int64)
-        # 将batch中每个句子的tokens对应的ID向量填入全0矩阵完成padding；
-        # idx：index，x：token ID 组成的向量；
+        # padding;
+        # idx: index，x: token ID;
         for idx, x in enumerate(input_idx):
             input_mat[idx, :len(x)] = x
-        # 将padding后的矩阵转换为tensor matrix；
+        # Transform the padding matrix into tensor matrix;
         input_v = torch.tensor(input_mat).to(device)
         input_v = input_v.cuda()
-        # 封装成PackedSequence类型的对象；
         # The padded sequence is the transposed matrix which is ``B x T x *``,
         # where `T` is the length of the longest sequence and `B` is the batch size.
         # Following the matrix is the list of lengths of each sequence in the batch (also in transposed format).
@@ -420,12 +424,10 @@ class PhraseModel(nn.Module):
         input_seq = rnn_utils.pack_padded_sequence(input_v, lens, batch_first=True)
         input_seq = input_seq.cuda()
         r = embeddings(input_seq.data)
-        # lookup embeddings；embeddings为模型已经建立的词向量矩阵；
         # r: the [B x T x dimension] matrix of the embeddings of the occurred words in input sequence.
         # The order is followed by the order in input_seq.
         # Which is transforming [a,a,a,a,b,b,b,b,c,c,c,c,d,d,d,d] into [embedding(a), embedding(a), ..., embedding(d), embedding(d)]
         r = r.cuda()
-        # 加入了词嵌入的input_seq；
         # For instance, given data  ``abc`` and `x`
         #         the :class:`PackedSequence` would contain data ``axbc`` with ``batch_sizes=[2,1,1]``.
         # emb_input_seq is [B x T x dimension] matrix of the embeddings of the occurred words in input sequence with the batch size.

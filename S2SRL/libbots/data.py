@@ -1,6 +1,5 @@
 import collections
 import os
-import sys
 import logging
 import itertools
 import pickle
@@ -123,22 +122,13 @@ def group_train_data(training_data):
     Group training pairs by first phrase
     :param training_data: list of (seq1, seq2) pairs
     :return: list of (seq1, [seq*]) pairs
-
-    这里的defaultdict(function_factory)构建的是一个类似dictionary的对象，
-    其中keys的值，自行确定赋值，但是values的类型，是function_factory的类实例，而且具有默认值。
-    比如defaultdict(int)则创建一个类似dictionary对象，里面任何的values都是int的实例，
-    而且就算是一个不存在的key, d[key] 也有一个默认值，这个默认值是int()的默认值0.
-    一般用法为：
-    d = collections.defaultdict(list)
-    for k, v in s:
-        d[k].append(v)
     """
     groups = collections.defaultdict(list)
     for p1, p2 in training_data:
-        # 取出key为tuple(p1)的value；
+        # Get the value whose key is tuple(p1);
         # If no value is assigned to the key, the default value (in this case empty list) is assigned to the key.
         l = groups[tuple(p1)]
-        # 将p2挂在value后面，完成grouping操作；
+        # Append p2 behind value to accomplish grouping operation.
         l.append(p2)
     return list(groups.items())
 
@@ -164,7 +154,7 @@ def iterate_batches(data, batch_size):
     ofs = 0
     while True:
         batch = data[ofs * batch_size:(ofs + 1) * batch_size]
-        # STAR: Why the length of a batch can not be one?
+        # Why the length of a batch can not be one?
         # if len(batch) <= 1:
         if len(batch) < 1:
             break
@@ -403,7 +393,6 @@ def load_data_MAML(QUESTION_PATH, DIC_PATH=None, max_tokens=None):
         return result
 
 
-# TODO: unify load_data_MAML_TEST with load_data_MAML with using 'response_bools';
 def load_data_MAML_TEST(QUESTION_PATH, DIC_PATH=None, max_tokens=None):
     result = []
     with open(QUESTION_PATH, 'r', encoding="UTF-8") as load_f:
@@ -464,7 +453,6 @@ def phrase_pairs_dict(phrase_pairs, freq_set):
     return res
 
 
-# 将dataset中的对话前一句和后一句组合成一个training pair;
 def dialogues_to_pairs(dialogues, max_tokens=None):
     """
     Convert dialogues to training pairs of phrases
