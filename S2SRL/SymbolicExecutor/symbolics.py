@@ -232,7 +232,6 @@ class Symbolics():
                     print("wrong symbolic")
         return self.answer
 
-    # TODO: NOT TESTED
     def is_A(self,e):
         #return type of entity
         if e == "":
@@ -376,7 +375,6 @@ class Symbolics():
             N = 0
         return [k for k in self.answer if len(self.answer[k]) > N]
 
-    # TODO: NOT TESTED!
     def less_than(self, e, r, t):
         content = self.answer
         if type(content) != dict: return []
@@ -406,8 +404,6 @@ class Symbolics():
             print('The sequence is:')
             print(self.seq)
         finally:
-            # 进行 union 操作
-            # todo 这里前面都和select部分一样 所以还是应该拆开？ union单独做 好处是union可以不止合并两个 字典里的都可以合并
             union_key = "|"
             union_value = set([])
             for k, v in answer_dict.items():
@@ -437,7 +433,6 @@ class Symbolics():
             print('The sequence is:')
             print(self.seq)
         finally:
-            # 进行 inter 类似 union
             inter_key = "&"
             inter_value = set([])
             for k, v in answer_dict.items():
@@ -450,7 +445,6 @@ class Symbolics():
             answer_dict[inter_key] = list(set(inter_value))
             return answer_dict
 
-    # TODO: NOT TESTED
     def diff(self, e, r, t):
         #print("A10:", e, r, t)
         if e == "": return {}
@@ -468,7 +462,6 @@ class Symbolics():
             print("ERROR for command: diff(%s,%s,%s)" % (e, r, t))
             print('The sequence is:')
             print(self.seq)
-        # 进行 diff 操作 类似 union
         finally:
             diff_key = "-"
             diff_value = set([])
@@ -508,7 +501,6 @@ class Symbolics():
             # print(self.seq)
             return 0
 
-    # TODO: NOT TESTED
     def at_least(self, N):
         # print("A12: at_least")
         # for k in list(self.answer):
@@ -522,7 +514,6 @@ class Symbolics():
                     answer_keys.append(k)
         return answer_keys
 
-    # TODO: NOT TESTED
     def at_most(self, N):
         # print("A13: at_most")
         answer_keys = []
@@ -534,7 +525,6 @@ class Symbolics():
                     answer_keys.append(k)
         return answer_keys
 
-    # TODO: NOT TESTED
     def equal(self, N):
         answer_keys = []
         if type(self.answer) == dict:

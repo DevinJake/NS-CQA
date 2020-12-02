@@ -1,5 +1,3 @@
-
-
 class BeamSearchNode(object):
     def __init__(self, hiddenstate, previousNode, wordId, logProb, length, logits):
         '''

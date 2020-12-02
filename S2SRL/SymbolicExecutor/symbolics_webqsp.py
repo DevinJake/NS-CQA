@@ -527,7 +527,6 @@ class Symbolics_WebQSP():
             N = 0
         return [k for k in self.answer if len(self.answer[k]) > N]
 
-    # TODO: NOT TESTED!
     def less_than(self, e, r, t):
         content = self.answer
         if type(content) != dict: return []
@@ -569,7 +568,6 @@ class Symbolics_WebQSP():
             print("ERROR! THE ACTION IS count(%s)!" % e)
             return 0
 
-    # TODO: NOT TESTED
     def at_least(self, N):
         # print("A12: at_least")
         # for k in list(self.answer):
@@ -583,7 +581,6 @@ class Symbolics_WebQSP():
                     answer_keys.append(k)
         return answer_keys
 
-    # TODO: NOT TESTED
     def at_most(self, N):
         # print("A13: at_most")
         answer_keys = []
@@ -595,7 +592,6 @@ class Symbolics_WebQSP():
                     answer_keys.append(k)
         return answer_keys
 
-    # TODO: NOT TESTED
     def equal(self, N):
         answer_keys = []
         if type(self.answer) == dict:
