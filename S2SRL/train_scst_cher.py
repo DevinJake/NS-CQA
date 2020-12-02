@@ -71,14 +71,11 @@ def run_test(test_data, net, rev_emb_dict, end_token, device="cuda"):
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)-15s %(levelname)s %(message)s", level=logging.INFO)
-    # # command line parameters
-    # # -a=True means using adaptive reward to train the model. -a=False is using 0-1 reward.
-    sys.argv = ['train_scst_cher_sample.py', '--cuda',
+    # command line parameters
+    sys.argv = ['train_scst_cher.py', '--cuda',
                 '-l=../data/saves/pretrained/pre_bleu_0.956_43.dat',
-                '-n=rl_TR_1%_batch8_withINT_beam=10_Montecarlo_CHER', '-s=5', '-a=0', '--att=0', '--lstm=1', '--int', '-w2v=300', '--beam_width=10', '--CHER', '--MonteCarlo', '--BeamSearch']
-    # sys.argv = ['train_scst_true_reward.py', '--cuda', '-l=../data/saves/crossent_even_1%/pre_bleu_0.946_55.dat', '-n=rl_even_true_1%', '-s=5']
+                '-n=rl_cher', '-s=5', '-a=0', '--att=0', '--lstm=1', '--int', '-w2v=300', '--beam_width=10', '--CHER', '--MonteCarlo', '--BeamSearch']
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--data", required=True, help="Category to use for training. Empty string to train on full processDataset")
     parser.add_argument("--cuda", action='store_true', default=False, help="Enable cuda")
     parser.add_argument("-n", "--name", required=True, help="Name of the run")
     parser.add_argument("-l", "--load", required=True,
@@ -118,7 +115,7 @@ if __name__ == "__main__":
     saves_path = os.path.join(SAVES_DIR, args.name)
     os.makedirs(saves_path, exist_ok=True)
 
-    # # List of (question, {question information and answer}) pairs, the training pairs are in format of 1:1.
+    # List of (question, {question information and answer}) pairs, the training pairs are in format of 1:1.
     if args.int:
         phrase_pairs, emb_dict = data.load_RL_data_TR_INT(TRAIN_QUESTION_ANSWER_PATH_INT, DIC_PATH_INT, MAX_TOKENS_INT)
         log.info("Obtained %d phrase pairs with %d uniq words from %s with INT mask information.", len(phrase_pairs),
@@ -131,7 +128,7 @@ if __name__ == "__main__":
     data.save_emb_dict(saves_path, emb_dict)
     end_token = emb_dict[data.END_TOKEN]
     train_data = data.encode_phrase_pairs_RLTR(phrase_pairs, emb_dict)
-    # # list of (seq1, [seq*]) pairs，把训练对做成1：N的形式；
+    # list of (seq1, [seq*]) pairs;
     # train_data = data.group_train_data(train_data)
     train_data = data.group_train_data_RLTR(train_data)
     rand = np.random.RandomState(data.SHUFFLE_SEED)

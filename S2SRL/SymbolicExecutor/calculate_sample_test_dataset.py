@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/4/8 21:02
-# @Author  : Yaoleo
-# @Blog    : yaoleo.github.io
+# @Author  : Devin Hua
 
 # coding:utf-8
-'''Get all questions, annotated actions, entities, relations, types together in JSON format.
-'''
+# Get all questions, annotated actions, entities, relations, types together in JSON format.
 import os
 import json
 from symbolics import Symbolics
@@ -15,7 +13,7 @@ import sys
 dir = '../../data/auto_QA_data/test_result/'
 os.makedirs(dir, exist_ok=True)
 log = logging.basicConfig(level = logging.INFO,
-                           filename ='../../data/auto_QA_data/test_result/rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER_all.log',
+                           filename ='../../data/auto_QA_data/test_result/rl_cher.log',
                            filemode ='w', format = '%(message)s')
 
 
@@ -107,10 +105,9 @@ def transMask2Action(state, withint):
     else:
         json_path = '../../data/auto_QA_data/CSQA_ANNOTATIONS_test.json'
         question_path = '../../data/auto_QA_data/mask_test/FINAL_test.question'
-    with open(json_path, 'r') as load_f, open("../../data/saves/rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER/final_int_predict.actions", 'r') as predict_actions \
-            , open(question_path, 'r') as RL_test:
-        # with open("../../data/auto_QA_data/CSQA_ANNOTATIONS_test.json", 'r') as load_f, open("../../data/saves/rl_even_TR_batch8_1%/final_predict.actions", 'r') as predict_actions \
-        #         , open("../../data/auto_QA_data/mask_test/FINAL_test.question", 'r') as RL_test:
+    with open(json_path, 'r') as load_f, \
+            open("../../data/saves/rl_cher/final_int_predict.actions", 'r') as predict_actions, \
+            open(question_path, 'r') as RL_test:
         linelist = list()
         load_dict = json.load(load_f)
         num = 0
@@ -133,7 +130,6 @@ def transMask2Action(state, withint):
                     if load_dict[id]["relation_mask"] is not None else {}
                 type_mask = load_dict[id]["type_mask"] \
                     if load_dict[id]["type_mask"] is not None else {}
-                # todo: test
                 int_mask = load_dict[id]["int_mask"] \
                     if 'int_mask' in load_dict[id] else {}
                 response_entities = load_dict[id]["response_entities"].strip() \
@@ -144,7 +140,6 @@ def transMask2Action(state, withint):
                 # Update(add) elements in dict.
                 entity_mask.update(relation_mask)
                 entity_mask.update(type_mask)
-                # todo: test
                 entity_mask.update(int_mask)
                 new_action = list()
                 # Default separator of split() method is any whitespace.
@@ -186,7 +181,6 @@ def transMask2Action(state, withint):
                             count_right_count += 1
                             '''print ("count_right_count+1")'''
                             logging.info("count_right_count+1")
-                # TODO: how to compute accuracy of BOOLEAN? By using response or response_bools?
                 # For boolean, the returned answer is a list.
                 if state.startswith("Verification(Boolean)(All)"):
                     # To judge the returned answers are in dict format or boolean format.
@@ -297,5 +291,4 @@ def calculate_RL_or_DL_result(file_path, withint):
 
 
 if __name__ == "__main__":
-    calculate_RL_or_DL_result('rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER_all', withint=True)
-    # calc_single_sample()
+    calculate_RL_or_DL_result('rl_cher', withint=True)

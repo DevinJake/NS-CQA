@@ -11,23 +11,13 @@ log = logging.getLogger("data_test")
 
 DIC_PATH = '../data/auto_QA_data/share.question'
 DIC_PATH_INT = '../data/auto_QA_data/share_INT.question'
-# DIC_PATH_INT = '../data/auto_QA_data/share_944K_INT.question'
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)-15s %(levelname)s %(message)s", level=logging.INFO)
-
-    # # command line parameters for final test
-    # sys.argv = ['data_test.py', '-m=bleu_0.984_09.dat', '-p=final', '--n=rl_even']
-    # command line parameters for final test (subset data)
-    # sys.argv = ['data_test.py', '-m=epoch_022_0.793_0.730.dat', '--cuda', '-p=sample_final_int',
-    #             '--n=rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER', '--att=0', '--lstm=1',
-    #             '--int', '-w2v=300', '--beam_search']
     sys.argv = ['data_test.py', '-m=epoch_022_0.793_0.730.dat', '--cuda', '-p=final_int',
-                '--n=rl_TR_1%_batch8_att=0_withINT_beam=10_Montecarlo_CHER', '--att=0', '--lstm=1',
+                '--n=rl_cher', '--att=0', '--lstm=1',
                 '--int', '-w2v=300', '--beam_search']
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--data", required=True,
-    #                     help="Category to use for training. Empty string to train on full processDataset")
     parser.add_argument("-m", "--model", required=True, help="Model name to load")
     parser.add_argument("-p", "--pred", required=True, help="the test processDataset format, py is one-to-one (one sentence with one reference), rl is one-to-many")
     parser.add_argument("-n", "--name", required=True, help="Name of the run")
