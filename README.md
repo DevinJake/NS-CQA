@@ -31,6 +31,8 @@ We first clone the project:
 git clone https://github.com/DevinJake/NS-CQA.git
 ``` 
 , and we could download a project `NS-CQA`.
+
+---
 ## CQA dataset
 Now we will talk about how to training and testing our proposed model on CQA dataset.  
 ### 1. Experiment environment.
