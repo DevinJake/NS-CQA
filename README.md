@@ -26,15 +26,15 @@ The typical examples of these seven question types are displayed in the followin
    Comparative Count | How many art genres express more number of humen or concepts than floral painting? | E1: floral painting <br> R1: depicts <br> T1: art genre <br> T2: human <br> t3: concept | SelectAll(T1, R1, T2) <br> SelectAll(T1, R1, T3) <br> GreaterThan(E1) <br> Count() | 8
 
 ---
-
-Now we will talk about how to training and testing our proposed model.  
+## CQA dataset
+Now we will talk about how to training and testing our proposed model on CQA dataset.  
 We first clone the project:
 ```
 git clone https://github.com/DevinJake/NS-CQA.git
 ``` 
 , and we could download a project `NS-CQA`.
 
-## 1. Experiment environment.
+### 1. Experiment environment.
  (1). Python = 3.6.4  
  (2). PyTorch = 1.1.0  
  (3). TensorFlow = 1.14.0 
@@ -43,7 +43,7 @@ git clone https://github.com/DevinJake/NS-CQA.git
  (6). flask = 1.1.2  
  (7). requests = 2.24.0  
   
-## 2. Accessing knowledge graph.
+### 2. Accessing knowledge graph.
  (1). Assign the IP address and the port number for the KG server.
 
  Manually assign the IP address and the port number in the file of the project `NS-CQA/BFS/server.py`.
@@ -67,7 +67,7 @@ git clone https://github.com/DevinJake/NS-CQA.git
  python server.py
  ```
   
- ## 3. Training the neural generator.
+ ### 3. Training the neural generator.
  (1). Load the pre-trained models.
  By using a breadth-first-search (BFS) algorithm, we generated pseudo-gold action sequences for a tiny subset of questions and pre-trained the model by Teacher Forcing with the help of these pairs of questions and action sequences.
  Therefore, we will further train the neural generator by using Reinforcement learning.   
@@ -81,7 +81,7 @@ git clone https://github.com/DevinJake/NS-CQA.git
  ```
  The trained neural generator and the corresponding action memory would be stored in the folder `NS-CQA/data/saves/rl_cher`.   
  
- ## 4. Testing.
+ ### 4. Testing.
   (1). Load the trained model.  
   The trained models will be stored in the folder `NS-CQA/data/saves/rl_cher`.  
   We have saved a trained CQA model `epoch_022_0.793_0.730.zip` in this folder, which could leads to the SOTA result.  
