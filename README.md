@@ -26,14 +26,13 @@ The typical examples of these seven question types are displayed in the followin
    Comparative Count | How many art genres express more number of humen or concepts than floral painting? | E1: floral painting <br> R1: depicts <br> T1: art genre <br> T2: human <br> t3: concept | SelectAll(T1, R1, T2) <br> SelectAll(T1, R1, T3) <br> GreaterThan(E1) <br> Count() | 8
 
 ---
-## CQA dataset
-Now we will talk about how to training and testing our proposed model on CQA dataset.  
 We first clone the project:
 ```
 git clone https://github.com/DevinJake/NS-CQA.git
 ``` 
 , and we could download a project `NS-CQA`.
-
+## CQA dataset
+Now we will talk about how to training and testing our proposed model on CQA dataset.  
 ### 1. Experiment environment.
  (1). Python = 3.6.4  
  (2). PyTorch = 1.1.0  
