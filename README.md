@@ -38,7 +38,7 @@ Now we will talk about how to training and testing our proposed model on CQA dat
 ### 1. Experiment environment.
  (1). Python = 3.6.4  
  (2). PyTorch = 1.1.0  
- (3). TensorFlow = 1.14.0 
+ (3). TensorFlow = 1.14.0  
  (4). tensorboardX = 2.1  
  (5). ptan = 0.4  
  (6). flask = 1.1.2  
