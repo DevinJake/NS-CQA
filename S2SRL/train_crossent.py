@@ -31,7 +31,6 @@ DIC_PATH = '../data/auto_QA_data/share.question'
 TRAIN_QUESTION_PATH_INT = '../data/auto_QA_data/mask_even_1.0%/PT_train_INT.question'
 TRAIN_ACTION_PATH_INT = '../data/auto_QA_data/mask_even_1.0%/PT_train_INT.action'
 DIC_PATH_INT = '../data/auto_QA_data/share_INT.question'
-# DIC_PATH_INT = '../data/auto_QA_data/share_944K_INT.question'
 
 TRAIN_QUESTION_PATH_WEBQSP = '../data/webqsp_data/mask/PT_train.question'
 TRAIN_ACTION_PATH_WEBQSP = '../data/webqsp_data/mask/PT_train.action'
@@ -65,15 +64,13 @@ if __name__ == "__main__":
     sys.argv = ['train_crossent.py',
                 '--cuda',
                 '-d=csqa',
-                '--n=crossent_1%_withINT_w2v=300',
+                '--n=crossent_1%_withINT_att=0_w2v=300',
                 '--att=0',
                 '--lstm=1',
                 '--int',
                 '-w2v=300']
 
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--data", required=True, help="Category to use for training. "
-    #                                                   "Empty string to train on full processDataset")
     parser.add_argument("--cuda", action='store_true', default=False,
                         help="Enable cuda")
     parser.add_argument("-d", "--dataset", default="csqa", help="Name of the dataset")
@@ -121,7 +118,7 @@ if __name__ == "__main__":
              len(phrase_pairs), len(emb_dict), TRAIN_QUESTION_PATH, TRAIN_ACTION_PATH)
     data.save_emb_dict(saves_path, emb_dict)
     end_token = emb_dict[data.END_TOKEN]
-    # 将tokens转换为emb_dict中的indices;
+    # Word -> index.
     train_data = data.encode_phrase_pairs(phrase_pairs, emb_dict)
     rand = np.random.RandomState(data.SHUFFLE_SEED)
     rand.shuffle(train_data)
@@ -137,9 +134,10 @@ if __name__ == "__main__":
     else:
         log.info("Using RNN mechanism to train the SEQ2SEQ model...")
 
-    net = model.PhraseModel(emb_size=args.word_dimension, dict_size=len(emb_dict),
-                            hid_size=model.HIDDEN_STATE_SIZE, LSTM_FLAG=args.lstm, ATT_FLAG=args.att).to(device)
-    # 转到cuda
+    net = model.PhraseModel(emb_size=args.word_dimension,
+                            dict_size=len(emb_dict),
+                            hid_size=model.HIDDEN_STATE_SIZE,
+                            LSTM_FLAG=args.lstm, ATT_FLAG=args.att).to(device)
     net.cuda()
     log.info("Model: %s", net)
 
@@ -169,17 +167,8 @@ if __name__ == "__main__":
 
         for batch in data.iterate_batches(train_data, BATCH_SIZE):
             optimiser.zero_grad()
-            # input_idx：一个batch的输入句子的tokens对应的ID矩阵；
-            # output_idx：一个batch的输出句子的tokens对应的ID矩阵；
-            ''' 猜测input_seq：一个batch输入的所有tokens的embedding，大小为358*50；
-            tensor([[-1.0363, -1.6041,  0.1451,  ..., -1.0645,  0.2387,  1.2934],
-        [-1.0363, -1.6041,  0.1451,  ..., -1.0645,  0.2387,  1.2934],
-        [-1.0363, -1.6041,  0.1451,  ..., -1.0645,  0.2387,  1.2934],
-        ...,
-        [ 0.5198, -0.3963,  1.4022,  ...,  1.0182,  0.2710, -1.5520],
-        [ 2.1937, -0.5535, -0.9000,  ..., -0.1032,  0.3514, -1.2759],
-        [-0.8078,  0.1575,  1.1064,  ...,  0.1365,  0.4121, -0.4211]],
-       device='cuda:0')'''
+            # input_idx: the ID matrix for the input tokens in a batch;
+            # output_idx: the ID matrix for the output tokens in a batch;
             input_seq, out_seq_list, _, out_idx = net.pack_batch(batch, net.emb, device)
             # net.encode calls nn.LSTM by which the forward function is called to run the neural network.
             # enc is a batch of last time step's hidden state outputted by encoder.
@@ -201,7 +190,7 @@ if __name__ == "__main__":
                     # Get predicted tokens.
                     seq = torch.max(r.data, dim=1)[1]
                     seq = seq.cpu().numpy()
-                # argmax做训练；
+                # Train by using the argmax；
                 else:
                     r, seq = net.decode_chain_argmax(enc_item, out_seq.data[0:1],
                                                      len(ref_indices), context[idx])
@@ -246,7 +235,7 @@ if __name__ == "__main__":
             out_name = os.path.join(saves_path, "epoch_%03d_%.3f_%.3f.dat" %
                                     (epoch, bleu, bleu_test))
             torch.save(net.state_dict(), out_name)
-        print ("------------------Epoch " + str(epoch) + ": training is over.------------------")
+        print("------------------Epoch " + str(epoch) + ": training is over.------------------")
 
     time_end = time.time()
     log.info("Training time is %.3fs." % (time_end - time_start))
