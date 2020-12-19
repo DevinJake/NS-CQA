@@ -75,6 +75,12 @@ Now we will talk about how to training and testing our proposed model on CQA dat
  
  We could download the pre-trained RL model `pre_bleu_0.956_43.zip`, uncompress it, and place it in the project folder `NS-CQA/data/saves/pretrained`.  
  
+ If you want to pre-train the models by yourself, you could:  
+ 1. Download the 'data\auto_QA_data\mask_even_1.0%\PT_train_INT.question' and 'data\auto_QA_data\mask_even_1.0%\PT_train_INT.action' from the [data link](https://drive.google.com/drive/folders/11HM--PcWxGicHnwMRTmgZ3GWCdugxiNC?usp=sharing). Put them under the folder 'mask_even_1.0%'. The files are the pseudo-gold annotations that were formed by using the BFS algorithm.
+2. Run python file 'S2SRL\train_crossent.py'.
+3. Under the folder 'data\saves\pretrained' you could find the models, which are trained under the teacher-forcing paradigm. The models are named following the format 'pre_bleu_TestingScore_numberOfEpochs.dat'. Normally we chose the model with the highest bleu testing score as the pre-trained model for following RL training. Or you could choose whatever model you like. 
+4. The performance of the chosen model might have a tiny difference between the uploaded pre-trained model 'pre_bleu_0.956_43.dat'. We recommend you to choose 'pre_bleu_0.956_43.dat' for re-implementation. 
+ 
  (2). Train the neural generator.  
  In the project folder `NS-CQA/S2SRL`, we run the python file to train the MAML model: 
  ```
