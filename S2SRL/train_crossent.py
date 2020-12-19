@@ -127,8 +127,6 @@ if __name__ == "__main__":
     log.info("Train set has %d phrases, test %d", len(train_data), len(test_data))
     if args.att:
         log.info("Using attention mechanism to train the SEQ2SEQ model...")
-    else:
-        log.info("Train the SEQ2SEQ model without attention mechanism...")
     if args.lstm:
         log.info("Using LSTM mechanism to train the SEQ2SEQ model...")
     else:
