@@ -32,13 +32,6 @@ TRAIN_QUESTION_PATH_INT = '../data/auto_QA_data/mask_even_1.0%/PT_train_INT.ques
 TRAIN_ACTION_PATH_INT = '../data/auto_QA_data/mask_even_1.0%/PT_train_INT.action'
 DIC_PATH_INT = '../data/auto_QA_data/share_INT.question'
 
-TRAIN_QUESTION_PATH_WEBQSP = '../data/webqsp_data/mask/PT_train.question'
-TRAIN_ACTION_PATH_WEBQSP = '../data/webqsp_data/mask/PT_train.action'
-DIC_PATH_WEBQSP = '../data/webqsp_data/share.webqsp.question'
-TRAIN_QUESTION_PATH_INT_WEBQSP = '../data/webqsp_data/mask/PT_train.question'
-TRAIN_ACTION_PATH_INT_WEBQSP = '../data/webqsp_data/mask/PT_train.action'
-DIC_PATH_INT_WEBQSP = '../data/webqsp_data/share.webqsp.question'
-
 def run_test(test_data, net, end_token, device="cuda"):
     bleu_sum = 0.0
     bleu_count = 0
@@ -51,7 +44,7 @@ def run_test(test_data, net, end_token, device="cuda"):
         # The maximum length of the output is defined in class libbots.data.
         _, tokens = net.decode_chain_argmax(enc, input_seq.data[0:1],
                                             seq_len=data.MAX_TOKENS,
-                                            context=context[0],
+                                            context = context[0],
                                             stop_at_token=end_token)
         bleu_sum += utils.calc_bleu(tokens, p2[1:])
         bleu_count += 1
@@ -61,19 +54,13 @@ if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)-15s %(levelname)s %(message)s", level=logging.INFO)
 
     # command line parameters
-    sys.argv = ['train_crossent.py',
-                '--cuda',
-                '-d=csqa',
-                '--n=pretrained',
-                '--att=0',
-                '--lstm=1',
-                '--int',
-                '-w2v=300']
+    sys.argv = ['train_crossent.py', '--cuda', '--n=pretrained', '--att=0', '--lstm=1', '--int', '-w2v=300']
 
     parser = argparse.ArgumentParser()
+    # parser.add_argument("--data", required=True, help="Category to use for training. "
+    #                                                   "Empty string to train on full processDataset")
     parser.add_argument("--cuda", action='store_true', default=False,
                         help="Enable cuda")
-    parser.add_argument("-d", "--dataset", default="csqa", help="Name of the dataset")
     parser.add_argument("-n", "--name", required=True, help="Name of the run")
     # Choose the function to compute reward (0-1 or adaptive reward).
     # If a = true, 1 or yes, the adaptive reward is used. Otherwise 0-1 reward is used.
@@ -90,27 +77,16 @@ if __name__ == "__main__":
     log.info("Device info: %s", str(device))
 
     saves_path = os.path.join(SAVES_DIR, args.name)
-    isExists = os.path.exists(saves_path)
-    if not isExists:
-        os.makedirs(saves_path)
-    # saves_path = os.path.join(SAVES_DIR, args.name)
-    # os.makedirs(saves_path, exist_ok=True)
+    os.makedirs(saves_path, exist_ok=True)
 
     # To get the input-output pairs and the relevant dictionary.
     if not args.int:
         log.info("Training model without INT mask information...")
-        if args.dataset == "csqa":
-            phrase_pairs, emb_dict = data.load_data_from_existing_data(TRAIN_QUESTION_PATH, TRAIN_ACTION_PATH, DIC_PATH, MAX_TOKENS)
-        else:
-            phrase_pairs, emb_dict = data.load_data_from_existing_data(TRAIN_QUESTION_PATH_WEBQSP, TRAIN_ACTION_PATH_WEBQSP, DIC_PATH_WEBQSP, MAX_TOKENS)
-
+        phrase_pairs, emb_dict = data.load_data_from_existing_data(TRAIN_QUESTION_PATH, TRAIN_ACTION_PATH, DIC_PATH, MAX_TOKENS)
 
     if args.int:
         log.info("Training model with INT mask information...")
-        if args.dataset == "csqa":
-            phrase_pairs, emb_dict = data.load_data_from_existing_data(TRAIN_QUESTION_PATH_INT, TRAIN_ACTION_PATH_INT, DIC_PATH_INT, MAX_TOKENS_INT)
-        else:
-            phrase_pairs, emb_dict = data.load_data_from_existing_data(TRAIN_QUESTION_PATH_INT_WEBQSP, TRAIN_ACTION_PATH_INT_WEBQSP, DIC_PATH_INT_WEBQSP, MAX_TOKENS_INT)
+        phrase_pairs, emb_dict = data.load_data_from_existing_data(TRAIN_QUESTION_PATH_INT, TRAIN_ACTION_PATH_INT, DIC_PATH_INT, MAX_TOKENS_INT)
 
     # Index -> word.
     rev_emb_dict = {idx: word for word, idx in emb_dict.items()}
@@ -132,10 +108,8 @@ if __name__ == "__main__":
     else:
         log.info("Using RNN mechanism to train the SEQ2SEQ model...")
 
-    net = model.PhraseModel(emb_size=args.word_dimension,
-                            dict_size=len(emb_dict),
-                            hid_size=model.HIDDEN_STATE_SIZE,
-                            LSTM_FLAG=args.lstm, ATT_FLAG=args.att).to(device)
+    net = model.PhraseModel(emb_size=args.word_dimension, dict_size=len(emb_dict),
+                            hid_size=model.HIDDEN_STATE_SIZE, LSTM_FLAG=args.lstm, ATT_FLAG=args.att).to(device)
     net.cuda()
     log.info("Model: %s", net)
 
@@ -152,17 +126,6 @@ if __name__ == "__main__":
         bleu_count = 0
         dial_shown = False
         random.shuffle(train_data)
-
-        # Put the model into training mode. Don't be mislead--the call to
-        # `train` just changes the *mode*, it doesn't *perform* the training.
-        # `dropout` and `batchnorm` layers behave differently during training
-        # vs. test (source: https://stackoverflow.com/questions/51433378/what-does-model-train-do-in-pytorch)
-        # model.train() tells your model that you are training the model.
-        # So effectively layers like dropout, batchnorm etc.
-        # which behave different on the train and test procedures know
-        # what is going on and hence can behave accordingly.
-        net.train()
-
         for batch in data.iterate_batches(train_data, BATCH_SIZE):
             optimiser.zero_grad()
             # input_idx: the ID matrix for the input tokens in a batch;
@@ -233,7 +196,7 @@ if __name__ == "__main__":
             out_name = os.path.join(saves_path, "epoch_%03d_%.3f_%.3f.dat" %
                                     (epoch, bleu, bleu_test))
             torch.save(net.state_dict(), out_name)
-        print("------------------Epoch " + str(epoch) + ": training is over.------------------")
+        print ("------------------Epoch " + str(epoch) + ": training is over.------------------")
 
     time_end = time.time()
     log.info("Training time is %.3fs." % (time_end - time_start))
