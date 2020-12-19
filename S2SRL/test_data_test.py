@@ -14,9 +14,9 @@ DIC_PATH_INT = '../data/auto_QA_data/share_INT.question'
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)-15s %(levelname)s %(message)s", level=logging.INFO)
-    sys.argv = ['data_test.py', '-m=epoch_022_0.793_0.730.dat', '--cuda', '-p=final_int',
-                '--n=rl_cher', '--att=0', '--lstm=1',
-                '--int', '-w2v=300', '--beam_search']
+    sys.argv = ['data_test.py', '-m=pre_bleu_0.951_68.dat', '--cuda', '-p=sample_final_int',
+                '--n=crossent_1%_withINT_att=0_w2v=300', '--att=0', '--lstm=1',
+                '--int', '-w2v=300']
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model", required=True, help="Model name to load")
     parser.add_argument("-p", "--pred", required=True, help="the test processDataset format, py is one-to-one (one sentence with one reference), rl is one-to-many")
