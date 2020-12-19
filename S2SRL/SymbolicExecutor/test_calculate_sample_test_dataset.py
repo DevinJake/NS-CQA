@@ -101,10 +101,10 @@ def calc_single_sample(withint=False):
 def transMask2Action(state, withint):
     if withint:
         json_path = '../../data/auto_QA_data/CSQA_ANNOTATIONS_test_INT.json'
-        question_path = '../../data/auto_QA_data/mask_test/FINAL_INT_test.question'
+        question_path = '../../data/auto_QA_data/mask_test/SAMPLE_FINAL_INT_test.question'
     else:
         json_path = '../../data/auto_QA_data/CSQA_ANNOTATIONS_test.json'
-        question_path = '../../data/auto_QA_data/mask_test/FINAL_test.question'
+        question_path = '../../data/auto_QA_data/mask_test/SAMPLE_FINAL_test.question'
     with open(json_path, 'r') as load_f, \
             open("../../data/saves/crossent_1%_withINT_att=0_w2v=300/sample_final_int_predict.actions", 'r') as predict_actions, \
             open(question_path, 'r') as RL_test:
