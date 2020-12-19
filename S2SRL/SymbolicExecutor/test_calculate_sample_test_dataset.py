@@ -13,7 +13,7 @@ import sys
 dir = '../../data/auto_QA_data/test_result/'
 os.makedirs(dir, exist_ok=True)
 log = logging.basicConfig(level = logging.INFO,
-                           filename ='../../data/auto_QA_data/test_result/rl_cher.log',
+                           filename ='../../data/auto_QA_data/test_result/crossent.log',
                            filemode ='w', format = '%(message)s')
 
 
