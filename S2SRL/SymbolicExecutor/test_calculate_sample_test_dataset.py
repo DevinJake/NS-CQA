@@ -13,7 +13,7 @@ import sys
 dir = '../../data/auto_QA_data/test_result/'
 os.makedirs(dir, exist_ok=True)
 log = logging.basicConfig(level = logging.INFO,
-                           filename ='../../data/auto_QA_data/test_result/crossent.log',
+                           filename ='../../data/auto_QA_data/test_result/pretrained.log',
                            filemode ='w', format = '%(message)s')
 
 
@@ -106,7 +106,7 @@ def transMask2Action(state, withint):
         json_path = '../../data/auto_QA_data/CSQA_ANNOTATIONS_test.json'
         question_path = '../../data/auto_QA_data/mask_test/SAMPLE_FINAL_test.question'
     with open(json_path, 'r') as load_f, \
-            open("../../data/saves/crossent_1%_withINT_att=0_w2v=300/sample_final_int_predict.actions", 'r') as predict_actions, \
+            open("../../data/saves/pretrained/sample_final_int_predict.actions", 'r') as predict_actions, \
             open(question_path, 'r') as RL_test:
         linelist = list()
         load_dict = json.load(load_f)
@@ -291,4 +291,4 @@ def calculate_RL_or_DL_result(file_path, withint):
 
 
 if __name__ == "__main__":
-    calculate_RL_or_DL_result('crossent', withint=True)
+    calculate_RL_or_DL_result('pretrained', withint=True)
