@@ -64,7 +64,7 @@ if __name__ == "__main__":
     sys.argv = ['train_crossent.py',
                 '--cuda',
                 '-d=csqa',
-                '--n=crossent_1%_withINT_att=0_w2v=300',
+                '--n=pretrained',
                 '--att=0',
                 '--lstm=1',
                 '--int',
