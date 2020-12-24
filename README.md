@@ -68,12 +68,18 @@ Now we will talk about how to training and testing our proposed model on CQA dat
  python server.py
  ```
   
- ### 3. Training the neural generator.
+### 3. Training the neural generator.
  (1). Load the pre-trained models.
  By using a breadth-first-search (BFS) algorithm, we generated pseudo-gold action sequences for a tiny subset of questions and pre-trained the model by Teacher Forcing with the help of these pairs of questions and action sequences.
  Therefore, we will further train the neural generator by using Reinforcement learning.   
  
  We could download the pre-trained RL model `pre_bleu_0.956_43.zip`, uncompress it, and place it in the project folder `NS-CQA/data/saves/pretrained`.  
+ 
+ If you want to pre-train the models by yourself, you could:  
+ 1. Download the 'data\auto_QA_data\mask_even_1.0%\PT_train_INT.question' and 'data\auto_QA_data\mask_even_1.0%\PT_train_INT.action' from the [data link](https://drive.google.com/drive/folders/11HM--PcWxGicHnwMRTmgZ3GWCdugxiNC?usp=sharing). Put them under the folder 'mask_even_1.0%'. The files are the pseudo-gold annotations that were formed by using the BFS algorithm.
+2. Run python file 'S2SRL\train_crossent.py'.
+3. Under the folder 'data\saves\pretrained' you could find the models, which are trained under the teacher-forcing paradigm. The models are named following the format 'pre_bleu_TestingScore_numberOfEpochs.dat'. Normally we chose the model with the highest bleu testing score as the pre-trained model for following RL training. Or you could choose whatever model you like. 
+4. The performance of the chosen model might have a tiny difference between the uploaded pre-trained model 'pre_bleu_0.956_43.dat'. We recommend you to choose 'pre_bleu_0.956_43.dat' for re-implementation. 
  
  (2). Train the neural generator.  
  In the project folder `NS-CQA/S2SRL`, we run the python file to train the MAML model: 
@@ -82,7 +88,7 @@ Now we will talk about how to training and testing our proposed model on CQA dat
  ```
  The trained neural generator and the corresponding action memory would be stored in the folder `NS-CQA/data/saves/rl_cher`.   
  
- ### 4. Testing.
+### 4. Testing.
   (1). Load the trained model.  
   The trained models will be stored in the folder `NS-CQA/data/saves/rl_cher`.  
   We have saved a trained CQA model `epoch_022_0.793_0.730.zip` in this folder, which could leads to the SOTA result.  
@@ -143,6 +149,97 @@ will finally call the function `transMask2Action()` to compute the accuracy of t
   
   The result will be stored in the file `NS-CQA/data/auto_QA_data/test_result/rl_cher.txt`.  
   
+  
+## WebQSP dataset
+Now we will talk about how to training and testing our proposed model on WebQSP(WebQuestions Semantic Parsest) dataset.  
+### 1. Experiment environment.
+ (1). Python = 3.6.4  
+ (2). PyTorch = 1.1.0  
+ (3). TensorFlow = 1.14.0  
+ (4). tensorboardX = 2.1  
+ (5). ptan = 0.4  
+ (6). flask = 1.1.2  
+ (7). requests = 2.24.0  
+  
+### 2. Accessing knowledge graph.
+ (1). Assign the IP address and the port number for the KG server.
+ Manually assign the IP address and the port number in the file of the project NS-CQA/webqspUtil/server.py
+ Insert the host address and the post number for your server in the following line of the code:
+ 
+ ```
+ app.run(host='**.***.**.**', port=####, use_debugger=True)
+ ```
+
+ Manually assign the IP address and the port number in the file of the project `NS-CQA/S2SRL/SymbolicExecutor/symbolics_webqsp_novar.py`.  
+ Insert the host address and the post number for your server in the following ***three*** lines in the `symbolics.py`: 
+ ```
+ content_json = requests.post("http://**.***.**.**:####/post", json=json_pack).json()
+ ```
+  
+ (2). Run the KG server.  
+ The kg we used is the subgraph about webQSP of freebase, you can download the file `webQSP_freebase_subgraph.zip` 
+ form the provided [data link](https://drive.google.com/file/d/1ZCkE51pG70X0Uwlr-HcI16X5pB7pFj-h/view?usp=sharing),
+ the final path is : `data/webqsp_data/webQSP_freebase_subgraph.json`.
+ Run the project file `NS-CQA/webqspUtil/server.py` to activate the KG server:
+
+ ```
+ python server.py
+ ```
+  
+### 3. Training the neural generator.
+ (1). Prepare the data.  
+ The WebQSP dataset can be download from the [data link](https://drive.google.com/file/d/1ZCkE51pG70X0Uwlr-HcI16X5pB7pFj-h/view?usp=sharing). We process the original dataset to
+ train and test in our experiment. 
+ The processed data we use can be download from the [data link](https://drive.google.com/file/d/18ykhC4x8P_1AUnQBzeGHxIi6F0jbDPwI/view?usp=sharing). WE could place the processed
+ pre-train data `PT_train.question`, `PT_train.action`, `PT_test.question`, `PT_test.action` in the folder `NS-CQA/data/webqsp_data/mask`,
+ place vocab file `share.webqsp.question` and final data `final_webqsp_train_RL.json`, `final_webqsp_test_RL.json` in `NS-CQA/data/webqsp_data`,
+ 
+ (2). Load the pre-trained models.  
+ You can run the project file `NS-CQA/S2SRL/train_crossent_webqsp.py` to train your own pre-train model:
+  ```
+ python train_crossent_webqsp.py
+ ```
+ or download the pre-trained RL model [epoch_030_0.995_0.966.dat](https://drive.google.com/file/d/1Jh68QFELDsp5B9QP0EiZHMLkTcMYk6_B/view?usp=sharing), uncompress it, 
+ and place it in the project folder `NS-CQA/data/webqsp_saves/pretrained`.  
+ 
+ 
+ (2). Train the neural generator.  
+ In the project folder `NS-CQA/S2SRL`, we run the python file to train the model: 
+ ```
+ python train_scst_cher_webqsp.py
+ ```
+ The trained neural generator and the corresponding action memory would be stored in the folder `NS-CQA/data/webqsp_saves/rl_cher`.   
+ 
+### 4. Testing.
+  (1). Load the trained model.  
+  The trained models will be stored in the folder `NS-CQA/data/webqsp_saves/rl_cher`.  
+  We have saved a trained CQA model `epoch_000_0.838_0.000.dat` in this folder, which could leads to the SOTA result.  
+  We could download such model from the [data link](https://drive.google.com/file/d/1Jh68QFELDsp5B9QP0EiZHMLkTcMYk6_B/view?usp=sharing), uncompress it,
+  and place it under the corresponding project folder.  
+  When testing the model, we could choose a best model from all the models that we have trained, or simply use our trained model `epoch_000_0.838_0.000.dat`.  
+  
+  (2). Load the testing dataset.  
+  You can find `final_webqsp_test_RL.json` in `NS-CQA/data/webqsp_data` as our test data.
+  
+  (3). Test.  
+  In the project file `NS-CQA/S2SRL/data_test_RL_webqsp.py`, we could change the parameters to meet our requirement.  
+  In the command line: 
+  ```
+          sys.argv = ['data_test_RL_webqsp.py', '-m=epoch_000_0.838_0.000.dat', '-p=rl', '--n=rl_cher', '--att=0', '-w2v=300', '--lstm=1']
+  ```
+  , we could change the following settings.
+  
+  If we want to use the models stored in the named folder `NS-CQA/data/saves/rl_cher`, we set `--n=rl_cher`.  
+  If we want to use our saved WebQSP model `net_***.dat` in the named folder to test the questions, we set `-m=net_***.dat`.  
+  
+  After setting, we run the file `NS-CQA/S2SRL/data_test_RL_webqsp.py` to generate the action sequence for each testing question:
+  ```
+  python data_test_RL_webqsp.py
+  ```
+  We could find the generated action sequences in the folder where the model is in (for instance `NS-CQA/data/webqsp_saves/rl_cher`),
+  which is stored in the file `rl_predict.actions`.   
+  
+
  #### References:  
  [1]. Yuncheng Hua, Yuan-Fang Li, Guilin Qi, Wei Wu, Jingyao Zhang, and Daiqing Qi. 2020. Less is more: Data-efficient complex question answering over knowledge bases. In Journal of Web Semantics 65 (2020): 100612.
  

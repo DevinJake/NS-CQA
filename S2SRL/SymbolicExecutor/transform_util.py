@@ -106,7 +106,11 @@ def list2dict_webqsp(list):
     for a in list:
         if (a.startswith("A")):
             if i < len(temp_list):
-                final_list.append({a: temp_list[i]})
+                no_empty_list = []
+                for item in temp_list[i]:
+                    if item != '':
+                        no_empty_list.append(item)
+                final_list.append({a: no_empty_list})
                 # temp_dict[a] = temp_list[i]
                 i += 1
 
