@@ -80,6 +80,18 @@ Now we will talk about how to training and testing our proposed model on CQA dat
 2. Run python file 'S2SRL\train_crossent.py'.
 3. Under the folder 'data\saves\pretrained' you could find the models, which are trained under the teacher-forcing paradigm. The models are named following the format 'pre_bleu_TestingScore_numberOfEpochs.dat'. Normally we chose the model with the highest bleu testing score as the pre-trained model for following RL training. Or you could choose whatever model you like. 
 4. The performance of the chosen model might have a tiny difference between the uploaded pre-trained model 'pre_bleu_0.956_43.dat'. We recommend you to choose 'pre_bleu_0.956_43.dat' for re-implementation. 
+
+ We also provided the code for the BFS algorithm.
+ If you are interested, you could:
+ 1. Download the 'data\official_downloaded_data\10k\train_10k.zip' from the [data link](https://drive.google.com/drive/folders/11HM--PcWxGicHnwMRTmgZ3GWCdugxiNC?usp=sharing). Uncompress the zip file and put them under the folder 'train_10k'. The files are the provided 10K samples of the CQA dataset.
+ 
+ 2. Under the folder `NS-CQA/S2SRL/SymbolicExecutor`, we run the python file to search for the pseudo-gold annotations for the `simple` type questions by using the BFS algorithm: 
+ ```
+ python auto_symbolic_simple.py
+ ```
+ The pseudo-gold annotations would be stored in the file `NS-CQA/data/annotation_logs/jws_simple_auto.log`. 
+ Similarly, we could get `jws_logical_auto.log` and `jws_count_auto.log` by running `auto_symbolic_logical.py` and `auto_symbolic_count.py`.
+ We provide the BFS codes for these three types of the questions for demonstration.  
  
  (2). Train the neural generator.  
  In the project folder `NS-CQA/S2SRL`, we run the python file to train the MAML model: 

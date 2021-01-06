@@ -223,7 +223,6 @@ class Interpreter():
             print("Some error occurs in execute_joint action!")
             return list(temp_set), 1
 
-    # TODO: NOT THROUGHLY TESTED!
     # A4
     def get_joint_answer(self, e, r):
         temp_set = set([])
@@ -240,7 +239,6 @@ class Interpreter():
             print("Some error occurs in get_joint_answer action!")
             return list(temp_set), 1
 
-    # TODO: NOT THROUGHLY TESTED!
     def get_filter_answer(self, e, r, t):
         temp_set = set([])
         e_list = []
