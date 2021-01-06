@@ -3,22 +3,24 @@
 import copy
 import time
 
-from Preprocess.load_qadata import load_qadata, getQA_by_state
-from .symbolics import Symbolics
+from Preprocess.load_qadata import load_qadata, getQA_by_state_py3
+from symbolics import Symbolics
 import logging
-logging.basicConfig(level=logging.INFO,#控制台打印的日志级别
-                    filename='/data/zjy/logical_auto.log',
-                    filemode='a',##模式，有w和a，w就是写模式，每次都会重新写日志，覆盖之前的日志
-                    #a是追加模式，默认如果不写的话，就是追加模式
-                    format=
-                    '%(message)s'
-                    #日志格式
+logging.basicConfig(level=logging.INFO,
+                    filename='../../data/annotation_logs/jws_logical_auto.log',
+                    filemode='w',
+                    format='%(message)s'
                     )
-continue_num = 4825
+# continue_num = 4825
+continue_num = 0
+
+
 class Node(object):
     def __init__(self, value=None):
-        self.value = value  # 节点值
-        self.child_list = []  # 子节点列表
+        # value of the node
+        self.value = value
+        # the list of the nodes
+        self.child_list = []
 
     def add_child(self, node):
         self.child_list.append(node)
@@ -26,7 +28,7 @@ class Node(object):
 
 def init():
     '''
-    初始化生成式规则
+    Initialize the rule of the breadth-first-search algorithm.
     '''
 
     symbolics = [Node('A' + str(i)) for i in range(0, 17)]
@@ -61,8 +63,7 @@ def init():
 
 def find_all_paths(node, path, paths):
     path += node.value + ">"
-
-    if (node == None or len(node.child_list) == 0):
+    if not node or len(node.child_list) == 0:
         temp_path = path
         paths.append(temp_path)
         return
@@ -78,18 +79,18 @@ def auto_generate():
 
 
 def cal_precesion(orig_answer, orig_answer_entities, cal_answer):
-    if (type(cal_answer) == bool):
+    if type(cal_answer) == bool:
         return cal_answer == orig_answer
-    if (type(cal_answer) == dict):
+    if type(cal_answer) == dict:
         temp = []
         for key, value in cal_answer.items():
-            if (value):
+            if value:
                 temp.extend(list(value))
         cal_answer = temp
 
     count = 0
     for e in cal_answer:
-        if (e in orig_answer_entities):
+        if e in orig_answer_entities:
             count += 1
     if len(orig_answer_entities) != 0:
         return count == (len(orig_answer_entities)) == len(cal_answer)
@@ -97,13 +98,13 @@ def cal_precesion(orig_answer, orig_answer_entities, cal_answer):
 
 
 def auto_test():
-    fname = "quantative_auto_symbolic.txt"
-    qa_result = open(fname, "a+")
+    fname = "../../data/annotation_logs/quantative_auto_symbolic.txt"
+    qa_result = open(fname, "w")
     qa_result.truncate()
-    print >> qa_result, "ssss"
-    qa_set = load_qadata("/data/zjy/preprocessed_data_10k/train")
+    # print >> qa_result, "ssss"
+    qa_set = load_qadata("../../data/official_downloaded_data/10k/train_10k")
 
-    qa_map = getQA_by_state(qa_set)
+    qa_map = getQA_by_state_py3(qa_set)
 
     symbolic_seqs = auto_generate()
     a = 0
@@ -120,7 +121,7 @@ def auto_test():
         orig_response = qa['orig_response'].replace("\n", "")
         logging.info(str(a)+" "+context_utterance)
 
-        print (a, time.time())
+        print(a, time.time())
         flag = 0
         a += 1
         if a < continue_num:
@@ -129,7 +130,7 @@ def auto_test():
             seq_with_param = {i: [] for i in range(len(seq))}
             for i in range(len(seq)):
                 symbolic = seq[i]
-                if (int(symbolic[1:]) in [1, 8, 9, 10]):
+                if int(symbolic[1:]) in [1, 8, 9, 10]:
                     for e in context_entities:
                         for r in context_relations:
                             for t in context_types:
@@ -140,8 +141,7 @@ def auto_test():
                 #         seq_with_param[i].append({symbolic: (e, '', '')})
                 #         # print symbolic, e
 
-            if (len(seq_with_param) == 2):
-
+            if len(seq_with_param) == 2:
                 for sym1 in seq_with_param[0]:
                     if flag == 4:
                         break
