@@ -98,7 +98,6 @@ def load_wikidata(wikidata_dir):
     #     par_child_dict = json.load(f1)
 
     wikidata_remove_list = [q for q in wikidata if q not in item_data]
-    # todo extend ？？
     wikidata_remove_list.extend([q for q in wikidata if 'P31' not in wikidata[q] and 'P279' not in wikidata[q]])
 
     wikidata_remove_list.extend(
